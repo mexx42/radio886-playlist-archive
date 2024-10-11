@@ -5,8 +5,11 @@
         <input v-model="artist" placeholder="Künstler" class="border p-2 mr-2 rounded">
         <input v-model="title" placeholder="Titel" class="border p-2 mr-2 rounded">
         <input v-model="days" type="number" placeholder="Tage" class="border p-2 mr-2 rounded" min="1">
-        <button type="submit" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-          Statistiken abrufen
+        <button 
+          :disabled="!((artist || title ) && days)"
+          type="submit" 
+          class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+          >Statistiken abrufen
         </button>
       </form>
       <div v-if="loading">Lade...</div>
@@ -29,7 +32,7 @@
   
   const title = ref('')
   const artist = ref('')
-  const days = ref()
+  const days = ref(7)
   
   const fetchStats = () => {
     fetchSongStats(title.value, artist.value, days.value)

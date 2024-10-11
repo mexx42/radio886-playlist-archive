@@ -97,6 +97,7 @@ export const useSongStore = defineStore('song', {
         } else {
           this.songWeeklyStats = null
         }
+        this.error = null
         this.loading = false
       } catch (error) {
         this.error = 'Fehler beim Abrufen der wöchentlichen Song-Statistiken'

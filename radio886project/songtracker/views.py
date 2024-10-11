@@ -7,19 +7,6 @@ from .models import Song
 from urllib.parse import unquote
 import time
 
-def get_current_song():
-    base_url = "https://meta.radio886.at/886/"
-    count = 711  # Startwert für count
-    
-    url = f"{base_url}{count}"
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Fehler beim Abrufen der Daten: HTTP {response.status_code}")
-        return None
-
 def get_current_song_thread():
     base_url = "https://meta.radio886.at/886/"
     count = 711  # Startwert für count
@@ -38,7 +25,6 @@ def get_current_song_thread():
 
             if data['count'] != count:
                 count = data['count']
-                print(f"Count gesetzt auf: {count}")
             
         else:
             print(f"Fehler beim Abrufen der Daten: HTTP {response.status_code}")
@@ -97,8 +83,8 @@ def get_song_stats(request):
     artist = request.GET.get('artist')
     days = int(request.GET.get('days', 7))
     
-    if title and artist:
-        play_count = Song.get_play_count(title, artist, days)
+    if title or artist:
+        play_count = Song.get_play_count(title=title, artist=artist, days=days)
         return JsonResponse({
             'status': 'success',
             'title': title,

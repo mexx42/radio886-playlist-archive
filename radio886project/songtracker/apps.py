@@ -14,4 +14,5 @@ class SongtrackerConfig(AppConfig):
         
         # Starten Sie das Song-Tracking in einem separaten Thread
         tracking_thread = threading.Thread(target=get_current_song_thread)
+        tracking_thread.setDaemon (True)
         tracking_thread.start()

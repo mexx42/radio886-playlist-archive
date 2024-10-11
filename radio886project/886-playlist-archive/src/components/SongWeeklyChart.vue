@@ -7,8 +7,11 @@
       <input v-model="store.songWeeklyStatsArtist" placeholder="Künstler eingeben" class="border p-2 mr-2 rounded"/>
       <input v-model="store.songWeeklyStatsTitle" placeholder="Titel eingeben" class="border p-2 mr-2 rounded"/>
       <input v-model="weeks" type="number" placeholder="Wochen" class="border p-2 mr-2 rounded" min="1">
-      <button @click="fetchData" class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        Aktualisieren
+      <button 
+        @click="fetchData" 
+        :disabled="!((store.songWeeklyStatsArtist || store.songWeeklyStatsTitle ) && weeks)"
+        class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >Aktualisieren
       </button>
    </div>
     <div v-if="chartData" class="chart-container">

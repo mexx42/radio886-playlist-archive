@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'django_crontab',
     'songtracker',
     'corsheaders',
 ]
@@ -145,10 +144,6 @@ CHANNEL_LAYERS = {
         },
     }
 }
-
-CRONJOBS = [
-    ('* * * * *', 'songtracker.cron.update_song')
-]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

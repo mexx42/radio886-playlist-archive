@@ -13,14 +13,19 @@ class Song(models.Model):
         return f"{self.artist} - {self.title} (Gespielt am {self.timestamp})"
 
     @classmethod
-    def get_play_count(cls, title, artist, days=7):
+    def get_play_count(cls, title=None, artist=None, days=7):
         end_date = timezone.now()
         start_date = end_date - timedelta(days=days)
-        return cls.objects.filter(
-            title=title,
-            artist=artist,
+        query = cls.objects.filter(
             timestamp__range=(start_date, end_date)
-        ).count()
+        )
+
+        if title:
+            query = query.filter(title__icontains=title)
+        if artist:
+            query = query.filter(artist__icontains=artist)        
+        
+        return query.count()
 
     @classmethod
     def get_last_song(cls):
@@ -43,9 +48,6 @@ class Song(models.Model):
             count=Count('id')
         ).order_by('week')
         
-        print (weekly_counts.count ())
-        print (weekly_counts)
-
         # Fülle fehlende Wochen mit Nullen auf
         all_weeks = {}
         current_week = start_date
