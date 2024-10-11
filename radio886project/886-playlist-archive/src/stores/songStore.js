@@ -10,6 +10,8 @@ export const useSongStore = defineStore('song', {
     recentSongs: [],
     songStats: null,
     songWeeklyStats: null,
+    songWeeklyStatsArtist: null,
+    songWeeklyStatsTitle: null,
     loading: false,
     error: null,
     socket: null
@@ -24,6 +26,7 @@ export const useSongStore = defineStore('song', {
 
       this.socket.addEventListener('message', (event) => {
         const data = JSON.parse(event.data)
+        console.log (data)
         if (data.message.type === 'new_song') {
           this.handleNewSong(data.message.song)
         }
@@ -38,7 +41,7 @@ export const useSongStore = defineStore('song', {
       })
     },
     handleNewSong(song) {
-      this.currentSong = `${song.artist} - ${song.title}`
+      this.currentSong = song
       this.recentSongs.unshift(song)
       if (this.recentSongs.length > 10) {
         this.recentSongs.pop()
@@ -77,22 +80,30 @@ export const useSongStore = defineStore('song', {
         this.loading = false
       }
     },
-    async fetchSongWeeklyStats(title, artist, weeks = 12) {
-        this.loading = true
-        try {
-          const response = await axios.get(`${API_BASE_URL}/songtracker/song-weekly-stats/`, {
-            params: {
-              title: encodeURIComponent(title),
-              artist: encodeURIComponent(artist),
-              weeks: weeks
-            }
-          })
+    async fetchSongWeeklyStats(weeks = 12) {
+      let title = this.songWeeklyStatsTitle
+      let artist = this.songWeeklyStatsArtist
+      this.loading = true
+      try {
+        const response = await axios.get(`${API_BASE_URL}/songtracker/song-weekly-stats/`, {
+          params: {
+            title: title ? encodeURIComponent(title) : undefined,
+            artist: artist ? encodeURIComponent(artist) : undefined,
+            weeks: weeks
+          }
+        })
+        if (response.data.status === "success") {
           this.songWeeklyStats = response.data.weekly_stats
-          this.loading = false
-        } catch (error) {
-          this.error = 'Fehler beim Abrufen der wöchentlichen Song-Statistiken'
-          this.loading = false
-          console.error('Fehler beim Abrufen der wöchentlichen Song-Statistiken:', error)
+        } else {
+          this.songWeeklyStats = null
         }
-      }  }
+        this.loading = false
+      } catch (error) {
+        this.error = 'Fehler beim Abrufen der wöchentlichen Song-Statistiken'
+        this.songWeeklyStats = null
+        this.loading = false
+        console.error('Fehler beim Abrufen der wöchentlichen Song-Statistiken:', error)
+      }
+    }
+  }
 })

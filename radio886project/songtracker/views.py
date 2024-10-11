@@ -4,6 +4,8 @@ from django.utils import timezone
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Song
+from urllib.parse import unquote
+import time
 
 def get_current_song():
     base_url = "https://meta.radio886.at/886/"
@@ -17,6 +19,32 @@ def get_current_song():
     else:
         print(f"Fehler beim Abrufen der Daten: HTTP {response.status_code}")
         return None
+
+def get_current_song_thread():
+    base_url = "https://meta.radio886.at/886/"
+    count = 711  # Startwert für count
+    last_data = None
+
+    while True:
+        url = f"{base_url}{count}?_={int(time.time()*1000)}"
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data != last_data:
+                process_song_data(data)
+                last_data = data
+
+            if data['count'] != count:
+                count = data['count']
+                print(f"Count gesetzt auf: {count}")
+            
+        else:
+            print(f"Fehler beim Abrufen der Daten: HTTP {response.status_code}")
+
+        time.sleep(60)  # Wartet 60 Sekunden
+
 
 def process_song_data(data):
     current_song = next((song for song in data['data'] if song['is_playing']), None)
@@ -54,7 +82,12 @@ def update_current_song(request):
         play_count = Song.get_play_count(last_song.title, last_song.artist)
         return JsonResponse({
             'status': 'success',
-            'song': str(last_song),
+            'song': {
+                "id": last_song.id,
+                "title": last_song.title,
+                "artist": last_song.artist,
+                "timestamp": last_song.timestamp.isoformat()
+            },
             'play_count_last_week': play_count,
         })
     return JsonResponse({'status': 'error', 'message': 'Kein aktueller Song verfügbar'})
@@ -82,16 +115,17 @@ def get_recent_songs(request):
     return JsonResponse({'status': 'success', 'songs': songs_data})
 
 def get_song_weekly_stats(request):
-    title = request.GET.get('title')
-    artist = request.GET.get('artist')
+    title = unquote (request.GET.get('title',""))
+    artist = unquote (request.GET.get('artist',""))
     weeks = int(request.GET.get('weeks', 12))
-    
-    if title and artist:
-        weekly_stats = Song.get_weekly_play_count(title, artist, weeks)
+
+    if title or artist:
+        weekly_stats = Song.get_weekly_play_count(title=title, artist=artist, weeks=weeks)
         return JsonResponse({
             'status': 'success',
             'title': title,
             'artist': artist,
             'weekly_stats': weekly_stats
         })
-    return JsonResponse({'status': 'error', 'message': 'Titel und Künstler sind erforderlich'})
+    return JsonResponse({'status': 'error', 'message': 'Titel oder Künstler ist erforderlich'})
+    

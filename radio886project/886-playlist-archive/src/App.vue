@@ -11,6 +11,7 @@
             <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
               <CurrentSong />
               <RecentSongs />
+              <SongWeeklyChart />
               <SongStats />
             </div>
           </div>
@@ -25,6 +26,7 @@ import { onMounted } from 'vue'
 import { useSongStore } from './stores/songStore'
 import CurrentSong from './components/CurrentSong.vue'
 import RecentSongs from './components/RecentSongs.vue'
+import SongWeeklyChart from './components/SongWeeklyChart.vue'
 import SongStats from './components/SongStats.vue'
 
 const store = useSongStore()

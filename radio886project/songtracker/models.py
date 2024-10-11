@@ -27,16 +27,35 @@ class Song(models.Model):
         return cls.objects.order_by('-timestamp').first()
 
     @classmethod
-    def get_weekly_play_count(cls, title, artist, weeks=12):
+    def get_weekly_play_count(cls, title=None, artist=None, weeks=12):
         end_date = timezone.now()
         start_date = end_date - timedelta(weeks=weeks)
-        weekly_counts = cls.objects.filter(
-            title=title,
-            artist=artist,
-            timestamp__range=(start_date, end_date)
-        ).annotate(
+        query = cls.objects.filter(timestamp__range=(start_date, end_date))
+        
+        if title:
+            query = query.filter(title__icontains=title)
+        if artist:
+            query = query.filter(artist__icontains=artist)
+        
+        weekly_counts = query.annotate(
             week=TruncWeek('timestamp')
         ).values('week').annotate(
             count=Count('id')
         ).order_by('week')
-        return list(weekly_counts)
+        
+        print (weekly_counts.count ())
+        print (weekly_counts)
+
+        # Fülle fehlende Wochen mit Nullen auf
+        all_weeks = {}
+        current_week = start_date
+        while current_week <= end_date:
+            all_weeks[current_week.date()] = 0
+            current_week += timedelta(weeks=1)
+        
+        for entry in weekly_counts:
+            all_weeks[entry['week'].date()] = entry['count']
+        
+        return [{'week': week.isoformat(), 'count': count} for week, count in all_weeks.items()]
+
+    

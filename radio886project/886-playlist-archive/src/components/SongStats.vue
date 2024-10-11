@@ -1,9 +1,9 @@
 <template>
     <div>
-      <h2 class="text-xl font-bold mb-2">Song Statistiken</h2>
+      <h2 class="text-xl font-bold mb-2">Wie oft gespielt in den letzten Tagen?</h2>
       <form @submit.prevent="fetchStats" class="mb-4">
-        <input v-model="title" placeholder="Titel" required class="border p-2 mr-2 rounded">
-        <input v-model="artist" placeholder="Künstler" required class="border p-2 mr-2 rounded">
+        <input v-model="artist" placeholder="Künstler" class="border p-2 mr-2 rounded">
+        <input v-model="title" placeholder="Titel" class="border p-2 mr-2 rounded">
         <input v-model="days" type="number" placeholder="Tage" class="border p-2 mr-2 rounded" min="1">
         <button type="submit" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
           Statistiken abrufen
@@ -29,7 +29,7 @@
   
   const title = ref('')
   const artist = ref('')
-  const days = ref(7)
+  const days = ref()
   
   const fetchStats = () => {
     fetchSongStats(title.value, artist.value, days.value)

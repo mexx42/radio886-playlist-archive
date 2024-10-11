@@ -6,19 +6,14 @@
       <ul v-else-if="recentSongs.length" class="list-disc pl-5">
         <li v-for="song in recentSongs" :key="song.id" class="mb-1">
           <button @click="selectSong(song)" class="text-left hover:text-blue-500">
-            {{ song.artist }} - {{ song.title }} ({{ formatDate(song.timestamp) }})
+            {{ formatDate(song.timestamp) }}: {{ capitalize(song.artist) }} - {{ capitalize(song.title) }}
           </button>
         </li>
       </ul>
       <div v-else>Keine kürzlich gespielten Songs verfügbar</div>
-      <button @click="fetchRecentSongs" class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+      <!-- <button @click="fetchRecentSongs" class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
         Aktualisieren
-      </button>
-  
-      <div v-if="selectedSong" class="mt-4">
-        <h3 class="text-lg font-semibold mb-2">{{ selectedSong.artist }} - {{ selectedSong.title }}</h3>
-        <SongWeeklyChart />
-      </div>
+      </button> -->
     </div>
   </template>
   
@@ -26,25 +21,34 @@
   import { ref, onMounted } from 'vue'
   import { storeToRefs } from 'pinia'
   import { useSongStore } from '../stores/songStore'
-  import SongWeeklyChart from './SongWeeklyChart.vue'
   
   const store = useSongStore()
-  const { recentSongs, loading, error } = storeToRefs(store)
+  const { recentSongs, loading, error, songWeeklyStatsArtist, songWeeklyStatsTitle } = storeToRefs(store)
   const { fetchRecentSongs, fetchSongWeeklyStats } = store
   
   const selectedSong = ref(null)
-  
+ 
+  function capitalize(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
   onMounted(() => {
     fetchRecentSongs()
   })
   
   const formatDate = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleString()
+    return date.toLocaleTimeString()
   }
   
   const selectSong = (song) => {
     selectedSong.value = song
-    fetchSongWeeklyStats(song.title, song.artist)
+    songWeeklyStatsArtist.value = song.artist
+    songWeeklyStatsTitle.value = song.title
+    fetchSongWeeklyStats() //song.title, song.artist)
   }
   </script>
